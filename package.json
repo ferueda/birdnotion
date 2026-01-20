@@ -2,6 +2,7 @@
   "name": "birdnotion",
   "version": "0.1.0",
   "description": "Save tweets and articles to Notion with one click",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite build --watch",
