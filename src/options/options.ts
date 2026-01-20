@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   testBtn.addEventListener('click', async () => {
     validationResults.style.display = 'block';
     statusMessage.style.display = 'none';
+    testBtn.disabled = true;
+    testBtn.textContent = 'Testing...';
 
     // Reset all states
     ['v-token', 'v-database', 'v-linked', 'v-properties'].forEach((id) => {
@@ -75,18 +77,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = tokenInput.value.trim();
     const databaseId = extractDatabaseId(databaseUrlInput.value.trim());
 
-    if (!token) {
-      setValidationState('v-token', 'error', 'Token required');
-      return;
+    try {
+      if (!token) {
+        setValidationState('v-token', 'error', 'Token required');
+        return;
+      }
+
+      if (!databaseId) {
+        setValidationState('v-database', 'error', 'Database ID required');
+        return;
+      }
+
+      // Step 1: Test token validity
+      const { testConnection, getDatabase, getDataSource } = await import('../lib/notion-client.js');
+      
+      try {
+        const user = await testConnection(token);
+        setValidationState('v-token', 'success', `Connected as ${user.name || 'Bot'}`);
+      } catch (err) {
+        setValidationState('v-token', 'error', err instanceof Error ? err.message : 'Invalid token');
+        return;
+      }
+
+      // Step 2: Get database and extract data source ID
+      let database;
+      let dataSourceId;
+      try {
+        database = await getDatabase(token, databaseId);
+        
+        if (!database.data_sources || database.data_sources.length === 0) {
+          setValidationState('v-database', 'error', 'Database has no data sources');
+          return;
+        }
+        
+        // Use the first data source (typically there's only one)
+        dataSourceId = database.data_sources[0].id;
+        setValidationState('v-database', 'success', 'Database accessible');
+      } catch (err) {
+        setValidationState('v-database', 'error', err instanceof Error ? err.message : 'Database not found');
+        return;
+      }
+
+      // Step 3: Check for linked databases
+      // Note: The API doesn't support linked databases
+      setValidationState('v-linked', 'success', 'Not a linked database');
+
+      // Step 4: Get data source schema and validate required properties
+      let dataSource;
+      try {
+        dataSource = await getDataSource(token, dataSourceId);
+      } catch (err) {
+        setValidationState('v-properties', 'error', err instanceof Error ? err.message : 'Failed to get data source schema');
+        return;
+      }
+
+      const requiredProps = ['Title', 'URL', 'Canonical URL', 'Saved At'];
+      const properties = dataSource.properties;
+      const missingProps = requiredProps.filter(prop => !properties[prop]);
+
+      if (missingProps.length > 0) {
+        setValidationState('v-properties', 'error', `Missing: ${missingProps.join(', ')}`);
+      } else {
+        setValidationState('v-properties', 'success', 'All required properties found');
+      }
+
+      // Store dataSourceId for later use
+      await saveSettings({ token, databaseId, dataSourceId });
+    } catch (err) {
+      console.error('Connection test failed:', err);
+      statusMessage.textContent = err instanceof Error ? err.message : 'Connection test failed';
+      statusMessage.className = 'status-message error';
+      statusMessage.style.display = 'block';
+    } finally {
+      testBtn.disabled = false;
+      testBtn.textContent = 'Test Connection';
     }
-
-    // TODO: Implement actual Notion API validation calls
-    // For now, just show pending states
-    console.log('Testing connection with:', { token: token.substring(0, 10) + '...', databaseId });
-
-    // Simulated validation - replace with real API calls
-    setValidationState('v-token', 'success', 'Token valid');
-    setValidationState('v-database', 'pending', 'Checking database...');
   });
 
   // Save settings
@@ -94,10 +159,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = tokenInput.value.trim();
     const databaseId = extractDatabaseId(databaseUrlInput.value.trim());
 
+    // Load existing settings to preserve dataSourceId
+    const existingSettings = await loadSettings();
+
     await saveSettings({
       token,
       databaseId,
-      dataSourceId: '', // TODO: Set from data source picker
+      dataSourceId: existingSettings.dataSourceId || '', // Preserve existing dataSourceId
     });
 
     statusMessage.textContent = 'Settings saved!';
