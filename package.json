@@ -1,0 +1,38 @@
+{
+  "name": "birdnotion",
+  "version": "0.1.0",
+  "description": "Save tweets and articles to Notion with one click",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "typecheck": "tsgo --noEmit",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "version:bump": "node scripts/bump-version.js",
+    "release": "node scripts/release.js",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major",
+    "package": "npm run build && cd dist && zip -r ../birdnotion.zip ."
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.28",
+    "@eslint/js": "^9.0.0",
+    "@mozilla/readability": "^0.5.0",
+    "@typescript/native-preview": "^7.0.0-dev.20250518",
+    "@types/chrome": "^0.0.287",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0"
+  }
+}
