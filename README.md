@@ -17,14 +17,45 @@ Chrome extension to save tweets and articles to Notion with one click.
 - Node.js 22+
 - A Notion account with an integration
 
-### Notion Integration
+### 1. Create Notion Integration
 
 1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Create a new integration
-3. Copy the "Internal Integration Secret"
-4. Share your target database with the integration
+2. Click **"+ New integration"**
+3. Give it a name (e.g., "BirdNotion")
+4. Select your workspace
+5. Click **"Submit"**
+6. Copy the **Internal Integration Secret** (starts with `secret_`)
 
-### Installation
+### 2. Create Notion Database
+
+Create a new database in Notion with the following properties:
+
+| Property Name | Type | Required | Notes |
+|--------------|------|----------|-------|
+| **Title** | Title | ✅ | Auto-created, page title |
+| **URL** | URL | ✅ | Original page URL |
+| **Canonical URL** | Text | ✅ | Normalized URL for dedupe |
+| **Domain** | Text | ✅ | Extracted domain |
+| **Content Type** | Select | ✅ | Options: article, tweet, tool, other |
+| **Saved At** | Date | ✅ | Timestamp when saved |
+| **Tags** | Multi-select | ⚪ | Optional tags |
+
+**Quick Setup:**
+- Create the database as a full page (not inline)
+- Add each property using the "+ New property" button
+- Make sure property names match exactly (case-sensitive!)
+
+### 3. Share Database with Integration
+
+1. Open your database in Notion
+2. Click the `...` menu (top-right)
+3. Click **"Connections"** or **"Add connections"**
+4. Find your integration and add it
+5. Copy the **Database ID** from the URL:
+   - URL format: `https://notion.so/workspace/DatabaseName-{database_id}?v=...`
+   - Database ID is the 32-character string after the database name
+
+### 4. Install Extension
 
 ```bash
 # Clone the repo
@@ -38,21 +69,55 @@ npm install
 npm run build
 ```
 
-### Load in Chrome
+### 5. Load in Chrome
 
 1. Open `chrome://extensions`
-2. Enable "Developer mode" (top right)
-3. Click "Load unpacked"
+2. Enable **"Developer mode"** (toggle in top-right)
+3. Click **"Load unpacked"**
 4. Select the `dist/` folder
 
-### Configure
+### 6. Configure Extension
 
-1. Click the BirdNotion extension icon
-2. Click "Settings"
-3. Enter your Notion integration token
-4. Enter your database URL or ID
-5. Click "Test Connection" to validate
-6. Click "Save Settings"
+1. Click the **BirdNotion extension icon** in Chrome toolbar
+2. Click **"Settings"** (or right-click → Options)
+3. Enter your:
+   - **Integration Token** (from step 1)
+   - **Database ID** (from step 3)
+4. Click **"Test Connection"**
+   - ✅ Should show: "Token valid", "Database accessible", "All required properties found"
+   - ❌ If errors, see Troubleshooting below
+5. Click **"Save Settings"**
+
+## Usage
+
+1. Navigate to any webpage or tweet
+2. Click the **BirdNotion icon**
+3. Optionally add tags or notes
+4. Click **"Save to Notion"**
+5. Click **"Open in Notion"** to view the saved page
+
+**Dedupe:** Saving the same URL again will show "Already saved" with a link to the existing page.
+
+## Troubleshooting
+
+### "Could not find database" error
+- Make sure the database is shared with your integration (step 3)
+- Verify you're using the database ID, not the page ID
+- Check that integration has access to the workspace
+
+### "Missing properties" error
+- Verify all required properties exist in your database
+- Property names must match exactly (case-sensitive)
+- Use property types shown in the table above
+
+### "Page already saved" on first save
+- The extension deduplicates by canonical URL
+- Check if a similar URL already exists in your database
+
+### Extension not appearing
+- Make sure you loaded the `dist/` folder, not the project root
+- Check `chrome://extensions` for any error messages
+- Try refreshing the extension (click refresh icon)
 
 ## Development
 
