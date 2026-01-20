@@ -10,6 +10,66 @@ export interface NotionPage {
   url: string;
 }
 
+export interface NotionError {
+  object: 'error';
+  status: number;
+  code: string;
+  message: string;
+}
+
+export interface NotionUser {
+  object: 'user';
+  id: string;
+  type: string;
+  name?: string;
+  avatar_url?: string;
+}
+
+export interface NotionDatabase {
+  object: 'database';
+  id: string;
+  created_time: string;
+  last_edited_time: string;
+  title: Array<{ type: 'text'; text: { content: string } }>;
+  description: Array<{ type: 'text'; text: { content: string } }>;
+  data_sources: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+export interface NotionDataSource {
+  object: 'data_source';
+  id: string;
+  created_time: string;
+  last_edited_time: string;
+  title: Array<{ type: 'text'; text: { content: string } }>;
+  description: Array<{ type: 'text'; text: { content: string } }>;
+  properties: Record<string, NotionProperty>;
+  parent: {
+    type: 'database_id';
+    database_id: string;
+  };
+}
+
+export interface NotionProperty {
+  id: string;
+  name: string;
+  type: string;
+  [key: string]: unknown;
+}
+
+export interface QueryDataSourceResponse {
+  object: 'list';
+  results: Array<{
+    id: string;
+    url: string;
+    properties: Record<string, unknown>;
+  }>;
+  next_cursor: string | null;
+  has_more: boolean;
+}
+
 const NOTION_API_VERSION = '2025-09-03';
 const NOTION_BASE_URL = 'https://api.notion.com/v1';
 const MAX_BLOCKS_PER_REQUEST = 100;
@@ -81,18 +141,40 @@ async function notionFetch(
   return response;
 }
 
-export async function testConnection(token: string): Promise<boolean> {
+export async function testConnection(token: string): Promise<NotionUser> {
   return requestQueue.enqueue(async () => {
     const response = await notionFetch('/users/me', { method: 'GET' }, token);
-    return response.ok;
+    if (!response.ok) {
+      const error: NotionError = await response.json();
+      throw new Error(error.message || `Connection test failed: ${response.status}`);
+    }
+    return response.json();
   });
 }
 
-export async function getDatabase(token: string, databaseId: string) {
+export async function getDatabase(
+  token: string,
+  databaseId: string
+): Promise<NotionDatabase> {
   return requestQueue.enqueue(async () => {
     const response = await notionFetch(`/databases/${databaseId}`, { method: 'GET' }, token);
     if (!response.ok) {
-      throw new Error(`Failed to get database: ${response.status}`);
+      const error: NotionError = await response.json();
+      throw new Error(error.message || `Failed to get database: ${response.status}`);
+    }
+    return response.json();
+  });
+}
+
+export async function getDataSource(
+  token: string,
+  dataSourceId: string
+): Promise<NotionDataSource> {
+  return requestQueue.enqueue(async () => {
+    const response = await notionFetch(`/data_sources/${dataSourceId}`, { method: 'GET' }, token);
+    if (!response.ok) {
+      const error: NotionError = await response.json();
+      throw new Error(error.message || `Failed to get data source: ${response.status}`);
     }
     return response.json();
   });
@@ -174,7 +256,6 @@ export async function queryByCanonicalUrl(
             property: propertyName,
             rich_text: { equals: canonicalUrl },
           },
-          filter_properties: [propertyName],
           page_size: 1,
         }),
       },
@@ -182,10 +263,11 @@ export async function queryByCanonicalUrl(
     );
 
     if (!response.ok) {
-      throw new Error('Failed to query data source');
+      const error: NotionError = await response.json();
+      throw new Error(error.message || 'Failed to query data source');
     }
 
-    const data = await response.json();
+    const data: QueryDataSourceResponse = await response.json();
     if (data.results && data.results.length > 0) {
       return { id: data.results[0].id, url: data.results[0].url };
     }
