@@ -7,7 +7,7 @@ interface Settings {
 }
 
 async function loadSettings(): Promise<Settings> {
-  const result = await chrome.storage.local.get(['token', 'databaseId', 'dataSourceId']);
+  const result = await chrome.storage.local.get(['token', 'databaseId', 'dataSourceId']) as Partial<Settings>;
   return {
     token: result.token || '',
     databaseId: result.databaseId || '',

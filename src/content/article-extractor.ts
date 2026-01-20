@@ -22,12 +22,12 @@ export function extractArticle(): ArticleData | null {
   }
 
   return {
-    title: article.title,
-    content: article.textContent,
-    excerpt: article.excerpt,
-    byline: article.byline,
-    siteName: article.siteName,
-    publishedTime: article.publishedTime,
+    title: article.title || 'Unknown Title',
+    content: article.textContent || '',
+    excerpt: article.excerpt || '',
+    byline: article.byline || null,
+    siteName: article.siteName || null,
+    publishedTime: article.publishedTime || null,
     url: window.location.href,
   };
 }
