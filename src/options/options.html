@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BirdNotion Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 32px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .section {
+      margin-bottom: 32px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+    .section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field:last-child {
+      margin-bottom: 0;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .field .hint {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #666;
+    }
+    .warning {
+      padding: 12px;
+      background: #fef3c7;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #92400e;
+      margin-bottom: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    button.secondary {
+      background: #f3f4f6;
+      color: #1a1a1a;
+    }
+    button.secondary:hover {
+      background: #e5e7eb;
+    }
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .validation-results {
+      margin-top: 16px;
+    }
+    .validation-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .validation-item:last-child {
+      border-bottom: none;
+    }
+    .validation-item .icon {
+      width: 20px;
+      text-align: center;
+    }
+    .validation-item.success .icon { color: #059669; }
+    .validation-item.error .icon { color: #dc2626; }
+    .validation-item.pending .icon { color: #9ca3af; }
+    .status-message {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .status-message.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <h1>BirdNotion Settings</h1>
+  <p class="subtitle">Configure your Notion integration</p>
+
+  <div class="section">
+    <h2>Notion Connection</h2>
+
+    <div class="field">
+      <label for="token">Integration Token</label>
+      <input type="password" id="token" placeholder="secret_...">
+      <p class="hint">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></p>
+    </div>
+
+    <div class="field">
+      <label for="databaseUrl">Database URL or ID</label>
+      <input type="text" id="databaseUrl" placeholder="https://notion.so/... or database_id">
+      <p class="hint">The database where clips will be saved</p>
+    </div>
+
+    <div class="warning">
+      ⚠️ Linked databases are not supported by the Notion API. Make sure to share the <strong>original</strong> database with your integration.
+    </div>
+
+    <div class="field" id="dataSourceField" style="display: none;">
+      <label for="dataSource">Data Source</label>
+      <select id="dataSource">
+        <option value="">Select data source...</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button id="testBtn" class="secondary">Test Connection</button>
+      <button id="saveBtn">Save Settings</button>
+    </div>
+
+    <div class="validation-results" id="validationResults" style="display: none;">
+      <div class="validation-item pending" id="v-token">
+        <span class="icon">○</span>
+        <span>Token valid</span>
+      </div>
+      <div class="validation-item pending" id="v-database">
+        <span class="icon">○</span>
+        <span>Database accessible</span>
+      </div>
+      <div class="validation-item pending" id="v-linked">
+        <span class="icon">○</span>
+        <span>Not a linked database</span>
+      </div>
+      <div class="validation-item pending" id="v-properties">
+        <span class="icon">○</span>
+        <span>Required properties exist</span>
+      </div>
+    </div>
+
+    <div class="status-message" id="statusMessage" style="display: none;"></div>
+  </div>
+
+  <script type="module" src="./options.ts"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BirdNotion</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .content-type {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #666;
+    }
+    .field {
+      margin-bottom: 12px;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      font-size: 12px;
+      color: #666;
+    }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .field textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checkbox-field input {
+      width: auto;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .settings-link {
+      display: block;
+      margin-top: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>BirdNotion</h1>
+    <span class="content-type" id="contentType">Detecting...</span>
+  </div>
+
+  <div class="field">
+    <label for="tags">Tags</label>
+    <input type="text" id="tags" placeholder="tech, ai, tools">
+  </div>
+
+  <div class="field">
+    <label for="type">Type</label>
+    <select id="type">
+      <option value="tweet">Tweet</option>
+      <option value="article">Article</option>
+      <option value="tool">Tool</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <div class="field checkbox-field">
+    <input type="checkbox" id="archiveMedia">
+    <label for="archiveMedia">Archive media</label>
+  </div>
+
+  <div class="field">
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" placeholder="Quick note..."></textarea>
+  </div>
+
+  <button id="saveBtn">Save to Notion</button>
+
+  <div class="status" id="status" style="display: none;"></div>
+
+  <a href="#" class="settings-link" id="settingsLink">Settings</a>
+
+  <script type="module" src="./popup.ts"></script>
+</body>
+</html>
